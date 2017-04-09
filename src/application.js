@@ -6,7 +6,7 @@ import Immutable from 'immutable';
 import installDevTools from 'immutable-devtools';
 import Application from './components/Application';
 import initI18n from './util/initI18n';
-import {init as initAnalytics, logPageview} from './clients/googleAnalytics';
+import { init as initAnalytics, logPageview } from './clients/googleAnalytics';
 
 installDevTools(Immutable);
 

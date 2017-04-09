@@ -1,9 +1,12 @@
+import transit from 'transit-immutable-js';
 import FirebasePersistor from '../persistors/FirebasePersistor';
 import validations from '../validations';
 import {isPristineProject} from '../util/projectUtils';
 import Analyzer from '../analyzers';
+import localStorage from '../util/localstorage'
 
 import applicationLoaded from './applicationLoaded';
+
 
 import {
   exportingGist,
@@ -30,6 +33,39 @@ import {
   userAuthenticated,
   userLoggedOut,
 } from './user';
+
+function persistSnapshotToLocalStorage(){
+    return (dispatch, getState) => {
+      dispatch({
+        type: 'PERSISTING_SNAPSHOT_TO_LOCAL_STORAGE',
+        meta: {timestamp: Date.now()},
+      });
+
+      const state = getState();
+      const serializedState = transit.toJSON(state);
+      localStorage.replace('org.popcode.snapshot', 0, serializedState, ()=>{})
+      return;
+    }
+}
+
+function getSnapshotFromLocalStorage(){
+    return async (dispatch, getState) => {
+      dispatch({
+        type: 'GETTING_SNAPSHOT_FROM_LOCAL_STORAGE',
+        meta: {timestamp: Date.now()},
+      });
+
+      localStorage.getAll('org.popcode.snapshot', (snapshot) => {
+        if (snapshot.length > 0) {
+          const state = transit.fromJSON(snapshot[0]);
+          console.log('state: %o', state);
+        }
+      });
+
+      return;
+    }
+}
+
 
 function getCurrentPersistor(state) {
   const currentUser = state.get('user');
@@ -172,4 +208,6 @@ export {
   userDismissedNotification,
   exportingGist,
   applicationLoaded,
+  getSnapshotFromLocalStorage,
+  persistSnapshotToLocalStorage
 };
